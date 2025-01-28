@@ -2,6 +2,7 @@
 /home/leonardo/componente-C2/src/tunel-dados/src/main/java/com/example/simulacao/ImprimirTabela.java
 /home/leonardo/componente-C2/src/tunel-dados/src/main/java/com/example/operacao/CriarTabela.java
 /home/leonardo/componente-C2/src/tunel-dados/src/main/java/com/example/Main.java
+/home/leonardo/componente-C2/src/tunel-dados/src/main/java/com/example/processamento/EnvLoader.java
 /home/leonardo/componente-C2/src/tunel-dados/src/main/java/com/example/simulacao/GerarDados.java
 /home/leonardo/componente-C2/src/tunel-dados/src/main/java/com/example/operacao/ExportarParaJson.java
 /home/leonardo/componente-C2/src/tunel-dados/src/main/java/com/example/autenticacao/ObterCredencial.java

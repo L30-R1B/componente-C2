@@ -23,33 +23,33 @@ public class Main {
             ConexaoSQLServer.iniciarConexao();
             switch (OPERACAO){
                 case "CRIAR_TABELA":
-                    if(args.length < 2){
-                        System.err.println("Argumentos : CRIAR_TABELA <(String)nome-da-tabela>");
+                    if(args.length < 3){
+                        System.err.println("Argumentos : CRIAR_TABELA <(String)nome-da-tabela> <(String)esquema-da-tabela>");
                         break;
                     }
-                    CriarTabela.criarTabela(args[1]);
+                    CriarTabela.criarTabela(args[1], args[2]);
                 break;
                 case "SALVAR_TABELA_COMO_JSON":
-                    if(args.length < 3){
-                        System.err.println("Argumentos : SALVAR_TABELA_COMO_JSON <(String)nome-da-tabela> <(String)caminho/arquivo.json>");
+                    if(args.length < 4){
+                        System.err.println("Argumentos : SALVAR_TABELA_COMO_JSON <(String)nome-da-tabela> <(String)caminho/arquivo.json> <(String)esquema-da-tabela>");
                         break;
                     }
-                    ExportarParaJson.salvarTabelaComoJson(args[1], args[2]);
+                    ExportarParaJson.salvarTabelaComoJson(args[1], args[2], args[3]);
                 break;
                 case "PREENCHER_TABELA":
-                    if(args.length < 3){
-                        System.err.println("Argumentos : PREENCHER_TABELA <(String)nome-da-tabela> <(int)quantidade-dados-gerados>");
+                    if(args.length < 4){
+                        System.err.println("Argumentos : PREENCHER_TABELA <(String)nome-da-tabela> <(int)quantidade-dados-gerados> <(String)esquema-tabela>");
                         break;
                     }
                 try {
                     int numero = Integer.parseInt(args[2]);
-                    GerarDados.gerarDadosTabela(args[1], numero);
+                    GerarDados.gerarDadosTabela(args[1], numero, args[3]);
                 } catch (NumberFormatException e) {
                     System.err.println("Argumento inválido ! ! !");
                 }
                 break;
                 case "ENVIAR_DADOS_PARA_PUB-SUB":
-                    if (args.length < 3) {
+                    if (args.length < 4) {
                         System.err.println("Argumentos : ENVIAR_DADOS_PARA_PUB-SUB <TOPIC_ID> <CAMINHO_ARQUIVO_JSON> <CAMINHO_ARQUIVO_CREDENCIAIS>");
                         break;
                     }

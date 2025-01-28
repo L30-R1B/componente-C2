@@ -1,9 +1,3 @@
-com/example/operacao/CriarTabela.class
-com/example/operacao/InserirDados.class
-com/example/operacao/PubSubSender.class
 com/example/simulacao/ImprimirTabela.class
 com/example/conexao/ConexaoSQLServer.class
-com/example/Main.class
-com/example/operacao/ExportarParaJson.class
-com/example/simulacao/GerarDados.class
 com/example/autenticacao/ObterCredencial.class

@@ -1,57 +1,49 @@
 package com.example.operacao;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 
 import com.example.conexao.ConexaoSQLServer;
+import com.example.processamento.EnvLoader;
 
 public class InserirDados {
 
-    private static boolean idExiste(String nomeTabela, int id) {
-        Connection conn = ConexaoSQLServer.getConexao();
-        String sql = "SELECT COUNT(*) FROM " + nomeTabela + " WHERE ID = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, id);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public static void inserirLinha(String nomeTabela, int id, int campo1, int campo2, int campo3, int campo4, int campo5, int campo6,
-                                    double float1, double float2, double float3, String dataHora1, String dataHora2) {
-        
-        if (idExiste(nomeTabela, id)) {
-            System.err.println("Erro: ID já existe na tabela. Ignorando a inserção.");
+    public static void inserirLinha(String nomeTabela, String envFilePath, Map<String, Object> valores) {
+        try {
+            EnvLoader.loadEnv(envFilePath);
+        } catch (IOException e) {
+            System.err.println("Erro ao carregar o arquivo .env: " + e.getMessage());
             return;
-        }    
-        
+        }
+
         Connection conn = ConexaoSQLServer.getConexao();
         PreparedStatement pstmt = null;
 
-        String sql = "INSERT INTO " + nomeTabela + " (ID, Campo1, Campo2, Campo3, Campo4, Campo5, Campo6, " +
-                     "Float1, Float2, Float3, DataHora1, DataHora2) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        // Construir dinamicamente a query
+        StringBuilder campos = new StringBuilder();
+        StringBuilder placeholders = new StringBuilder();
+
+        EnvLoader.getFields().forEach((campo, tipo) -> {
+            campos.append(campo).append(", ");
+            placeholders.append("?, ");
+        });
+
+        // Remover última vírgula e espaço
+        campos.setLength(campos.length() - 2);
+        placeholders.setLength(placeholders.length() - 2);
+
+        String sql = "INSERT INTO " + nomeTabela + " (" + campos + ") VALUES (" + placeholders + ")";
 
         try {
             pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, id);
-            pstmt.setInt(2, campo1);
-            pstmt.setInt(3, campo2);
-            pstmt.setInt(4, campo3);
-            pstmt.setInt(5, campo4);
-            pstmt.setInt(6, campo5);
-            pstmt.setInt(7, campo6);
-            pstmt.setDouble(8, float1);
-            pstmt.setDouble(9, float2);
-            pstmt.setDouble(10, float3);
-            pstmt.setString(11, dataHora1);
-            pstmt.setString(12, dataHora2);
+
+            int index = 1;
+            for (String campo : EnvLoader.getFields().keySet()) {
+                pstmt.setObject(index++, valores.get(campo));
+            }
 
             pstmt.executeUpdate();
             System.out.println("Linha adicionada com sucesso na tabela '" + nomeTabela + "'!");
@@ -60,9 +52,7 @@ public class InserirDados {
             e.printStackTrace();
         } finally {
             try {
-                if (pstmt != null) {
-                    pstmt.close();
-                }
+                if (pstmt != null) pstmt.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }

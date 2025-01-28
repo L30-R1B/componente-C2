@@ -2,10 +2,13 @@ package com.example.simulacao;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.example.operacao.InserirDados;
+import com.example.processamento.EnvLoader;
 
 public class GerarDados {
 
@@ -23,30 +26,46 @@ public class GerarDados {
 
         return dataAleatoria.format(formatter);
     }
-    
-    public static void gerarDadosTabela(String nomeTabela, int quantidadeLinhasGeradas){
+
+    public static Object gerarValorAleatorio(String tipo, Random rand) {
+        switch (tipo.toUpperCase()) {
+            case "INT":
+            case "BIGINT":
+                return rand.nextInt(1, 10000); // Gera valores inteiros aleatórios
+            case "FLOAT":
+            case "DOUBLE":
+                return rand.nextDouble(1.0, 1000.0); // Gera valores decimais aleatórios
+            case "DATETIME":
+            case "DATE":
+                return gerarDataHoraAleatoria("2020-01-01 00:00:00", "2024-12-31 23:59:59");
+            case "VARCHAR":
+            case "TEXT":
+                return "Texto_" + rand.nextInt(1, 100); // Gera strings aleatórias simples
+            default:
+                return null; // Para tipos não reconhecidos
+        }
+    }
+
+    public static void gerarDadosTabela(String nomeTabela, int quantidadeLinhasGeradas, String envFilePath) {
+        // Carregar configuração do arquivo .env
+        try {
+            EnvLoader.loadEnv(envFilePath);
+        } catch (Exception e) {
+            System.err.println("Erro ao carregar o arquivo .env: " + e.getMessage());
+            return;
+        }
+
         Random rand = new Random();
 
-        int campo1, campo2, campo3, campo4, campo5, campo6;
-        float float1, float2, float3;
-        String dataHora1, dataHora2;
+        for (int i = 0; i < quantidadeLinhasGeradas; i++) {
+            // Criar mapa de valores dinâmicos para os campos
+            Map<String, Object> valores = new HashMap<>();
+            for (Map.Entry<String, String> campo : EnvLoader.getFields().entrySet()) {
+                valores.put(campo.getKey(), gerarValorAleatorio(campo.getValue(), rand));
+            }
 
-        for(int i = 0; i < quantidadeLinhasGeradas; i ++){
-            campo1 = rand.nextInt(0, 10);
-            campo2 = rand.nextInt(100, 1000);
-            campo3 = rand.nextInt(100, 1000);
-            campo4 = rand.nextInt(100, 1000);
-            campo5 = rand.nextInt(100000, 1000000);
-            campo6 = rand.nextInt(100000, 1000000);
-
-            float1 = rand.nextFloat(0.0f, 10.0f);
-            float2 = rand.nextFloat(100.0f, 1000.0f);
-            float3 = rand.nextFloat(0.0f, 100.0f);
-            
-            dataHora1 = gerarDataHoraAleatoria("2020-01-01 00:00:00", "2024-01-01 00:00:00");
-            dataHora2 = gerarDataHoraAleatoria("2024-01-01 00:00:00", "2024-12-01 00:00:00");
-
-            InserirDados.inserirLinha(nomeTabela, i, campo1, campo2, campo3, campo4, campo5, campo6, float1, float2, float3, dataHora1, dataHora2);
+            // Inserir linha na tabela
+            InserirDados.inserirLinha(nomeTabela, envFilePath, valores);
         }
     }
 }
